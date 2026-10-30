@@ -36,3 +36,7 @@ The `plugin/` frontend is dependency-free and uses only `window.kai.call`. Its r
 Run `npm test` using Node 20 or later. Standalone tests cover non-mutating startup, JSON argument boundaries, dispatch, and escaping. Core additionally launches a synthetic local MCP server to test real discovery, invocation, environment filtering, shutdown, privacy checks, and data preservation. Live third-party servers and Windows process-tree cleanup require platform validation.
 
 Keep signing keys outside this repository. Core's release pipeline builds and signs the distributable.
+
+## Workspace appearance
+
+The standalone window follows the original Tools & accounts layout: server rows, the bundled server picker, runtime setup, and an expandable custom-server form. The separate action panel keeps request arguments and results together. Email and calendar connections remain in the Connections plugin; no unavailable account controls are shown here.

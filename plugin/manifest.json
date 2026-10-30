@@ -3,7 +3,7 @@
   "apiVersion": 2,
   "id": "kai.tools",
   "name": "KAI Tools",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Manage MCP tool servers, inspect their tools, and review every launch and action.",
   "entry": "index.html",
   "permissions": [
