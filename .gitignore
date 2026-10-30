@@ -1,3 +1,7 @@
 node_modules/
 *.pem
 .env
+
+# Signed native runtime dependencies are owned by this plugin.
+!plugin/service/node_modules/
+!plugin/service/node_modules/**

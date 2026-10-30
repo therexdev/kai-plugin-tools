@@ -1,43 +1,78 @@
-name: Verify and publish plugin
+name: Validate and publish Foundation plugin
 on:
   push:
-    branches: [main]
+    branches: [main, foundation-v1]
+  pull_request:
   workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
 concurrency:
-  group: plugin-release
+  group: plugin-${{ github.ref }}
   cancel-in-progress: false
 jobs:
-  release:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
+  verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    outputs:
+      release_ready: ${{ steps.package.outputs.release_ready }}
+      asset: ${{ steps.package.outputs.asset }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+      - name: Rebuild locked dependencies without install hooks
+        shell: bash
+        run: |
+          if test -f package-lock.json; then npm ci --ignore-scripts; fi
+          npm run build --if-present
+          git diff --exit-code -- plugin
+      - name: Verify Foundation source and dependency payloads
+        run: node scripts/verify-package.js --source
       - run: npm test
-      - name: Verify signature and exact source contents
+      - name: Detect signed package for this exact version
+        id: package
+        shell: bash
+        run: |
+          node -e 'const fs=require("node:fs"),p=require("./package.json"),m=require("./plugin/manifest.json"),asset=p.name+"-"+m.version+".kaiplugin";fs.appendFileSync(process.env.GITHUB_OUTPUT,"asset="+asset+"\nrelease_ready="+fs.existsSync("dist/"+asset)+"\n")'
+      - name: Verify release signature and exact source contents
+        if: steps.package.outputs.release_ready == 'true'
         run: node scripts/verify-package.js
-      - name: Publish immutable installable package
+  release:
+    needs: verify
+    if: github.ref == 'refs/heads/main' && needs.verify.outputs.release_ready == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Verify signed immutable asset again before publication
+        run: node scripts/verify-package.js
+      - name: Publish only the pre-signed current package
         env:
           GH_TOKEN: ${{ github.token }}
+          ASSET: ${{ needs.verify.outputs.asset }}
         shell: bash
         run: |
           version=$(node -p "require('./plugin/manifest.json').version")
           tag="v$version"
-          asset=$(node -p "require('./package.json').name + '-' + require('./plugin/manifest.json').version + '.kaiplugin'")
           if gh release view "$tag" >/dev/null 2>&1; then
             mkdir -p "$RUNNER_TEMP/existing-release"
-            gh release download "$tag" --pattern "$asset" --dir "$RUNNER_TEMP/existing-release"
-            cmp "dist/$asset" "$RUNNER_TEMP/existing-release/$asset"
-            echo "Existing immutable release matches the verified package."
+            gh release download "$tag" --pattern "$ASSET" --dir "$RUNNER_TEMP/existing-release"
+            cmp "dist/$ASSET" "$RUNNER_TEMP/existing-release/$ASSET"
           else
-            gh release create "$tag" "dist/$asset" --target "$GITHUB_SHA" --title "$(node -p "require('./plugin/manifest.json').name") $version" --notes-file RELEASE_NOTES.md
+            gh release create "$tag" "dist/$ASSET" --target "$GITHUB_SHA" --title "$(node -p "require('./plugin/manifest.json').name") $version" --notes-file RELEASE_NOTES.md
           fi
       - uses: actions/upload-artifact@v4
         with:
           name: signed-plugin
-          path: dist/*.kaiplugin
+          path: dist/${{ needs.verify.outputs.asset }}
           if-no-files-found: error

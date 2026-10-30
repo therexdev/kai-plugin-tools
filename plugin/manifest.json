@@ -1,14 +1,30 @@
 {
-  "schema": 1,
-  "apiVersion": 2,
+  "schema": 2,
+  "apiVersion": 3,
   "id": "kai.tools",
   "name": "KAI Tools",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "The original Tools and Developer Tools workspaces: MCP, email, calendar, saved agent teams, pipelines, playground and benchmarks.",
   "entry": "index.html",
   "permissions": [
-    "tools.read",
-    "tools.manage",
-    "tools.execute"
-  ]
+    "native.execute",
+    "models.read",
+    "inference.local",
+    "storage.read",
+    "storage.write",
+    "services.call",
+    "services.provide",
+    "network.status",
+    "inference.network",
+    "wallet.authorize",
+    "desktop.windows",
+    "secrets.use",
+    "network.fetch"
+  ],
+  "runtime": "native",
+  "service": "service/index.js",
+  "provides": [
+    "kai.tools"
+  ],
+  "consumes": []
 }
