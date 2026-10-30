@@ -1,0 +1,9 @@
+{
+  "name": "kai-plugin-tools",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "apiVersion": 2,
+  "id": "kai.tools",
+  "name": "KAI Tools",
+  "version": "0.1.0",
+  "description": "Manage MCP tool servers, inspect their tools, and review every launch and action.",
+  "entry": "index.html",
+  "permissions": [
+    "tools.read",
+    "tools.manage",
+    "tools.execute"
+  ]
+}
