@@ -1,12 +1,161 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; base-uri 'none'; form-action 'none'"><title>KAI Tools</title><link rel="stylesheet" href="kai-theme.css"><link rel="stylesheet" href="style.css"></head><body>
-<header class="workspace-header"><div class="workspace-name"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m13 7 4 4M15 3a6 6 0 0 0-7 7L2 16a3 3 0 0 0 6 6l6-6a6 6 0 0 0 7-7l-4 4-6-6Z"/></svg><h1>Tools</h1></div><span class="pill" id="privacy">Connecting to Core</span></header>
-<main class="workspace-page"><div id="notice" role="status" aria-live="polite" hidden></div><div class="api-card"><div class="page-heading"><div><h1>Tools &amp; accounts</h1><p class="lead">Give your AI abilities with tool servers. Review each server and action before it runs.</p></div><button id="refresh">Refresh</button></div><p id="localonly-note" class="local-note" hidden>Privacy mode is <strong>Local-Only</strong>: tools that talk to the internet are paused. Choose an online mode in Core Settings to use them.</p>
-<nav aria-label="Tools sections"><button data-tab="servers" aria-selected="true">Tool servers</button><button data-tab="add" aria-selected="false">Add a server</button><button data-tab="inspect" aria-selected="false">Run a tool</button></nav>
-<section id="servers"><h2 class="section-title">Tool servers <span class="muted">(Model Context Protocol)</span></h2><div id="server-list"></div>
-<div class="catalog-picker"><label class="sr-only" for="catalog-select">Choose a tool server</label><select id="catalog-select"><option value="">Loading tool servers…</option></select><button id="catalog-add" class="primary" type="button">Add</button></div><p id="catalog-description" class="muted"></p><div id="catalog" hidden></div>
-<div class="runtime"><p class="muted">Most tool servers need Node.js. Use an installed copy or KAI's managed runtime.</p><div class="actions"><span id="runtime-status" class="muted">Check the runtime before starting a local server.</span><button id="runtime-check" class="text-button">Check runtime</button><button id="runtime-install">Set up tool runtime</button></div></div>
-</section>
-<details id="add"><summary>Add your own (URL or command)</summary><form class="stack" id="server-form"><div class="form-grid"><label>Name<input id="name" required maxlength="60" placeholder="My tools"></label><label>Connection<select id="transport"><option value="http">Web server (HTTP)</option><option value="stdio">Local command</option></select></label></div><div id="http-fields"><label>Server URL<input id="url" type="url" placeholder="https://… (an MCP server URL)"></label><p class="mini muted">Use HTTPS, or HTTP on localhost. URLs with passwords are rejected.</p></div><div id="stdio-fields" class="stack" hidden><label>Executable<input id="command" placeholder="npx or a full executable path"></label><label>Arguments (JSON array)<textarea id="args" spellcheck="false">[]</textarea></label><label id="folder-label" hidden>Additional folder argument<input id="folder" placeholder="Full path to a folder"></label><label class="check"><input id="local-safe" type="checkbox">I trust this program to work offline in Local-Only mode.</label><p class="note">Local servers run as your OS user and may access files and the network. Start only programs you trust.</p></div><div class="actions"><button class="primary" type="submit">Review and add server</button><button id="cancel-add" type="button">Cancel</button></div></form></details>
-<p class="account-note">Manage what KAI remembers in the Brain plugin. Connect email, calendar, and other apps in Connections.</p>
-<section id="inspect" hidden><div class="section-heading"><h2>Run a tool</h2><button data-tab="servers">Back to servers</button></div><div class="grid"><form class="panel stack" id="tool-form"><label>Connected server<select id="run-server"></select></label><label>Tool<select id="run-tool"></select></label><p id="tool-description" class="muted"></p><details><summary>Input schema</summary><pre id="tool-schema">{}</pre></details><label>Arguments (JSON object)<textarea id="tool-args" rows="8" spellcheck="false">{}</textarea></label><button class="primary" type="submit">Review and run</button></form><div class="panel"><h2>Result</h2><p class="muted">The selected server receives your arguments. Its output appears here.</p><pre id="result">No tool has run yet.</pre></div></div></section>
-</div></main><script src="kai-notices.js"></script><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tools & accounts</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="product-experience.css"><link rel="stylesheet" href="plugin-layout.css"></head><body><main id="main"><nav class="subtabs tools-navigation" aria-label="Tools sections"><button data-tools-view="tools" class="subtab active">Tools &amp; accounts</button><button data-tools-view="devtools" class="subtab" id="nav-devtools" hidden>Developer tools</button></nav><section id="view-tools" class="view" hidden>
+        <div class="api-card">
+          <h1>Tools &amp; accounts</h1>
+          <p class="lede">Give your AI abilities: tool servers (MCP), a memory that lasts across chats, and your email &amp; calendar. Everything asks before acting until you say otherwise.</p>
+          <p id="tools-localonly-note" class="hint" hidden>Privacy mode is <b>Local-Only</b>: tools that talk to the internet (including email &amp; calendar) are switched off. Change it in Local API → Privacy.</p>
+
+          <div class="api-card tools-dev-switch"><div class="toggle-row"><div><b>Developer tools</b><p class="hint">Build multi-agent teams, try custom pipelines, and benchmark your model. Each action keeps its own permissions and approvals.</p></div><button id="btn-dev-toggle" class="switch" role="switch" aria-checked="false" aria-label="Developer tools"><span></span></button></div><p id="tools-developer-error" class="error" hidden role="alert"></p></div><h2 class="net-h">Tool servers <span class="hint">(Model Context Protocol)</span></h2>
+          <div id="mcp-list"></div>
+          <div class="form-row">
+            <select id="mcp-catalog"></select>
+            <input id="mcp-catalog-arg" type="text" spellcheck="false" hidden />
+            <button id="mcp-add-catalog" class="primary small" type="button">Add</button>
+          </div>
+          <div id="mcp-node-note"></div>
+          <details id="mcp-advanced">
+            <summary class="hint">Add your own (URL or command)</summary>
+            <div class="form-row"><input id="mcp-name" placeholder="Name, e.g. My tools" /></div>
+            <div class="form-row"><input id="mcp-url" placeholder="https://… (an MCP server URL)" /></div>
+            <div class="form-row"><input id="mcp-cmd" placeholder="or a local command, e.g. npx -y @modelcontextprotocol/server-fetch" /></div>
+            <div class="form-row"><button id="mcp-add-custom" class="primary small" type="button">Add server</button></div>
+          </details>
+
+          <p class="hint">Manage everything KAI remembers in Brain → Memories.</p>
+
+          <h2 class="net-h">Email</h2>
+          <div id="email-panel"></div>
+
+          <h2 class="net-h">Calendar</h2>
+          <div id="calendar-panel"></div>
+        </div>
+      </section>      <section id="view-devtools" class="view" hidden>
+        <div class="api-card">
+          <h1>Developer Tools</h1>
+          <p class="lede">Build and run your own agent systems on this machine's API — from a one-line pipeline to a team of named agents that talk, use tools, and ask you questions.</p>
+          <div class="developer-models form-row"><label>Source <select id="src-pick"><option value="local">Local model</option><option value="network">Network model</option></select></label><label>Model <select id="model-pick"></select></label><p id="network-model-price" class="hint" hidden></p></div><nav id="devtools-tabs" class="subtabs" aria-label="Developer tools sections">
+            <button class="subtab active" data-tab="agents">Multi-agent</button>
+            <button class="subtab" data-tab="playground">Playground</button>
+            <button class="subtab" data-tab="pipelines">Pipelines</button>
+            <button class="subtab" data-tab="bench">Benchmark</button>
+          </nav>
+
+          <div id="devtab-agents" class="devtab">
+            <p class="hint">
+              Named agents share one conversation. Pick how the floor moves — round robin, a model
+              moderator, or explicit handoffs — and how it ends. A <b>human</b> agent pauses the run
+              and asks you. Hard ceilings always hold: 60 messages, 120 model calls, 6 tool actions
+              per turn. Apps can POST the same spec to <code>/core/agents/run</code>.
+            </p>
+            <div class="dev-fields dev-team-fields">
+              <label class="dev-field">Team name<input id="ag-label" placeholder="e.g. Research duo" /></label>
+              <label class="dev-field">Turn order<select id="ag-mode">
+                <option value="round_robin">Round robin — agents speak in order</option>
+                <option value="selector">Selector — a model picks who speaks next</option>
+                <option value="handoff">Handoff — the speaker passes the floor by name</option>
+              </select></label>
+            </div>
+            <div id="ag-list"></div>
+            <div class="form-row"><button id="btn-ag-add" class="small">+ Add agent</button></div>
+            <div class="dev-fields dev-limits">
+              <label class="dev-field">Max messages<input id="ag-maxmsg" type="number" min="1" max="60" value="12" /></label>
+              <label class="dev-field">Max model calls<input id="ag-maxcalls" type="number" min="1" max="120" value="40" /></label>
+              <label class="dev-field">End phrase<input id="ag-term" placeholder="TERMINATE" /></label>
+            </div>
+            <div class="dev-editor">
+              <div class="dev-section-head">
+                <label for="ag-json">Team JSON</label>
+                <button id="btn-ag-tojson" class="small">Update JSON from builder</button>
+              </div>
+              <textarea id="ag-json" rows="10" spellcheck="false" aria-describedby="ag-json-help"></textarea>
+              <p id="ag-json-help" class="hint">Update the JSON after changing the builder. Saving and running use this JSON.</p>
+              <div class="form-row"><button id="btn-ag-save" class="primary small">Save team</button></div>
+            </div>
+            <div class="dev-saved-team">
+              <label class="dev-field">Saved teams<select id="ag-defs"></select></label>
+              <div class="form-row">
+                <button id="btn-ag-load" class="small">Load</button>
+                <button id="btn-ag-del" class="small">Delete</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="devtab-playground" class="devtab" hidden>
+            <p class="hint">
+              Run a team and watch the conversation live. When a human agent's turn comes, the box
+              below asks you — the run waits (up to its timeout) for your words.
+            </p>
+            <div class="dev-fields dev-team-fields">
+              <label class="dev-field">Team<select id="pg-source"></select></label>
+              <label class="dev-field">Task<input id="pg-task" placeholder="What should the team do?" /></label>
+            </div>
+            <div class="form-row">
+              <button id="btn-pg-run" class="primary small">Run</button>
+              <button id="btn-pg-stop" class="small" hidden>Stop</button>
+              <span id="pg-status" class="meta"></span>
+            </div>
+            <div id="pg-convo"></div>
+            <div id="pg-input-row" class="form-row" hidden>
+              <input id="pg-input" aria-label="Your message to the team" placeholder="It's your turn — type your message" />
+              <button id="btn-pg-send" class="primary small">Send</button>
+            </div>
+          </div>
+
+          <div id="devtab-pipelines" class="devtab" hidden>
+            <p class="hint">
+              The simple track: one pipeline of typed stages (plan → work → write → critique →
+              revise). Budgets cap at the built-in ceilings (4 sub-tasks, 4 actions per worker,
+              24 model calls) no matter what the spec asks. Also at <code>/core/teams/run</code>.
+            </p>
+            <div id="dev-builder">
+              <label class="dev-field">Pipeline name<input id="devb-label" placeholder="e.g. Research pipeline" /></label>
+              <fieldset class="dev-stages">
+                <legend>Stages</legend>
+                <div class="form-row" id="devb-stages">
+                  <label class="check"><input type="checkbox" data-stage="plan" checked /> plan</label>
+                  <label class="check"><input type="checkbox" data-stage="work" checked /> work</label>
+                  <label class="check"><input type="checkbox" data-stage="write" checked disabled /> write (always)</label>
+                  <label class="check"><input type="checkbox" data-stage="critique" checked /> critique</label>
+                  <label class="check"><input type="checkbox" data-stage="revise" checked /> revise</label>
+                </div>
+              </fieldset>
+              <div class="form-row" id="devb-tools"><span class="meta">loading tools…</span></div>
+              <div class="dev-fields dev-limits">
+                <label class="dev-field">Sub-tasks<input id="devb-subtasks" type="number" min="1" max="4" value="2" /></label>
+                <label class="dev-field">Actions per worker<input id="devb-actions" type="number" min="1" max="4" value="3" /></label>
+                <label class="dev-field">Max model calls<input id="devb-calls" type="number" min="1" max="24" value="16" /></label>
+              </div>
+              <label class="dev-field">Worker goal (optional)<input id="devb-workgoal" placeholder="What each worker should do" /></label>
+            </div>
+            <div class="dev-editor">
+              <div class="dev-section-head">
+                <label for="dev-spec">Pipeline JSON</label>
+                <button id="btn-devb-apply" class="small">Update JSON from builder</button>
+              </div>
+              <textarea id="dev-spec" rows="10" spellcheck="false" aria-describedby="dev-spec-help"></textarea>
+              <p id="dev-spec-help" class="hint">Update the JSON after changing the builder. Running uses this JSON.</p>
+            </div>
+            <label class="dev-field">Task<input id="dev-question" placeholder="What should the pipeline do?" /></label>
+            <div class="form-row">
+              <button id="btn-dev-run" class="primary small">Run team</button>
+              <span id="dev-run-status" class="meta"></span>
+            </div>
+            <pre id="dev-team-out" class="snippet" hidden></pre>
+          </div>
+
+          <div id="devtab-bench" class="devtab" hidden>
+            <p class="hint">
+              Scores the current model on a fixed suite of objective tasks — arithmetic, instruction
+              following, JSON output, extraction, and a tool-using agent case. Same tasks every run,
+              so scores compare across models and app versions. Also at <code>/core/bench/run</code>.
+            </p>
+            <div class="form-row">
+              <button id="btn-dev-bench" class="primary small">Run benchmark</button>
+              <span id="dev-bench-status" class="meta"></span>
+            </div>
+            <pre id="dev-bench-out" class="snippet" hidden></pre>
+          </div>
+
+          <p class="error" id="dev-error" hidden></p>
+        </div>
+      </section><section id="view-recovery" class="view" hidden><h1>Research &amp; agent results</h1></section></main><script src="locales/catalogs.js"></script><script src="i18n.js"></script><script src="markdown.js"></script><script src="legacy-fetch.js"></script><script src="app.js"></script><script src="tools-view.js"></script><script src="network-chat.js"></script><script src="credit-runs.js"></script><script src="devtools-view.js"></script><script src="start.js"></script></body></html>

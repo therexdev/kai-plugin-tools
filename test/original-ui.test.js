@@ -1,0 +1,5 @@
+"use strict";
+const test=require("node:test"),assert=require("node:assert/strict"),fs=require("node:fs"),path=require("node:path"),crypto=require("node:crypto");
+const root=path.join(__dirname,".."),origin=require("../ORIGINAL_UI.json");
+test("vendored original screen and styles remain intact",()=>{for(const [file,digest] of Object.entries(origin.files))assert.equal(crypto.createHash("sha256").update(fs.readFileSync(path.join(root,"plugin",file))).digest("hex"),digest,file);});
+test("screen loads original actions through the bounded native transport",()=>{const html=fs.readFileSync(path.join(root,"plugin/index.html"),"utf8");for(const source of html.matchAll(/<script src="([^"]+)"/g))assert.ok(fs.existsSync(path.join(root,"plugin",source[1])),source[1]);assert.ok(html.includes('id="view-'+origin.screen+'"'));const bridge=fs.readFileSync(path.join(root,"plugin/legacy-fetch.js"),"utf8");assert.match(bridge,/options.signal/);assert.match(bridge,/prefix\+"\.cancel"/);assert.match(bridge,/Unsupported feature request/);assert.ok(!bridge.includes('http://127.0.0.1'));});

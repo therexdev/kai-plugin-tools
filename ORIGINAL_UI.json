@@ -1,0 +1,17 @@
+{
+  "repository": "therexdev/kaiapp",
+  "commit": "34d17faa0526213b8fc0ac7a65aa7f2c186c6547",
+  "screen": "tools",
+  "files": {
+    "tools-view.js": "b3453f4c15f0a497c56b7a69eba898e2cb78a79c2e60ef56663156803cee3d70",
+    "styles.css": "e03b95c82b7a7d3bf3f0425be892860f277bf540c79998e8f1617e69acec8a7b",
+    "product-experience.css": "e1a9f0061522e15d45fc256d7bfca819016f4b26b9af0d54b4c714c680b341c1",
+    "credit-runs.js": "30546641c0307b6e62d9b11c26fc7743496817827744d91ab99b2ff60dd563bc",
+    "network-chat.js": "e5d0855dd84beeee059a5be962a263cc0a46ff0032c10fc664b2722fd97b0116"
+  },
+  "adaptations": [
+    "Scoped native transport replaces original localhost fetch.",
+    "Application shell is separate; original feature markup, styles and actions retained.",
+    "Original Developer Tools added as a second view, excluding obsolete duplicate Code handlers; original credit-budget renderers retained."
+  ]
+}

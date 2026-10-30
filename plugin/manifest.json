@@ -3,8 +3,8 @@
   "apiVersion": 2,
   "id": "kai.tools",
   "name": "KAI Tools",
-  "version": "0.1.1",
-  "description": "Manage MCP tool servers, inspect their tools, and review every launch and action.",
+  "version": "0.2.0",
+  "description": "The original Tools and Developer Tools workspaces: MCP, email, calendar, saved agent teams, pipelines, playground and benchmarks.",
   "entry": "index.html",
   "permissions": [
     "tools.read",

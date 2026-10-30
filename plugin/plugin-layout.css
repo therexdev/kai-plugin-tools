@@ -1,0 +1,3 @@
+html,body{height:100%;margin:0}#main{width:100%;height:100%;overflow:auto}.view{flex:1;min-height:100%;height:auto}
+
+.tools-navigation{display:flex;gap:8px;padding:14px 24px;border-bottom:1px solid var(--line,#dde4ed)}.tools-dev-switch{padding:16px 0}.tools-dev-switch .toggle-row{display:flex;align-items:center;justify-content:space-between;gap:24px}.developer-models{align-items:end;margin-bottom:20px}.developer-models label{display:flex;flex-direction:column;gap:6px}
