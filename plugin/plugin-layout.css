@@ -1,3 +1,29 @@
 html,body{height:100%;margin:0}#main{width:100%;height:100%;overflow:auto}.view{flex:1;min-height:100%;height:auto}
 
 .tools-navigation{display:flex;gap:8px;padding:14px 24px;border-bottom:1px solid var(--line,#dde4ed)}.tools-dev-switch{padding:16px 0}.tools-dev-switch .toggle-row{display:flex;align-items:center;justify-content:space-between;gap:24px}.developer-models{align-items:end;margin-bottom:20px}.developer-models label{display:flex;flex-direction:column;gap:6px}
+
+/* Budget reviews share Core's pearl/cobalt dialog layout. */
+#credit-run-review{width:min(580px,calc(100vw - 36px));max-height:calc(100dvh - 36px);margin:auto;padding:0;overflow:hidden;border:1px solid #dce5f2;border-radius:18px;color:#14284e;background:#f4f7fd;box-shadow:0 24px 80px #14284e30;font:14px/1.6 Inter,"Segoe UI",Arial,sans-serif}
+#credit-run-review::backdrop{background:#14284e55;backdrop-filter:blur(4px)}
+#credit-run-review form{margin:0;display:flex;flex-direction:column;max-height:calc(100dvh - 38px)}
+#credit-run-review .credit-run-header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 23px;background:#fff;border-bottom:1px solid #dce5f2;flex:none}
+#credit-run-review .credit-run-header>span{display:flex;align-items:center;gap:11px;font-size:14px;font-weight:650}
+#credit-run-review button{font:inherit;font-size:12px;line-height:1.5;min-height:39px;margin:0;padding:9px 16px;border:1px solid #dce5f2;border-radius:9px;color:#14284e;background:#fff;cursor:pointer}
+#credit-run-review button:hover{background:#edf4ff;border-color:#b7cff6}
+#credit-run-review button.primary{color:#fff;background:#155eef;border-color:#155eef;font-weight:650}
+#credit-run-review button.primary:hover{background:#0c4ed3;border-color:#0c4ed3}
+#credit-run-review button:focus-visible,#credit-run-review input:focus-visible{outline:2px solid #155eef;outline-offset:3px}
+#credit-run-review #credit-run-close{display:grid;place-items:center;width:32px;min-height:32px;padding:5px;border:0;color:#61728d;background:transparent}
+#credit-run-close svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round}
+#credit-run-review .credit-run-body{min-height:0;overflow:auto;overscroll-behavior:contain;padding:25px 27px 20px}
+#credit-run-review h2{margin:0 0 16px;font-size:24px;line-height:1.3;letter-spacing:-.6px;font-weight:650}
+#credit-run-review p{color:#61728d;font-size:12px;line-height:1.7;margin:0 0 16px}
+#credit-run-review .credit-run-field{display:block;margin:19px 0 16px;font-size:12px;font-weight:550;color:#14284e}
+#credit-run-review #credit-run-budget{display:block;width:100%;margin:7px 0 0;padding:11px 12px;border:1px solid #dce5f2;border-radius:9px;color:#14284e;background:#fff;font:inherit}
+#credit-run-review .credit-run-check{display:flex;align-items:center;gap:9px;margin:0 0 12px;font-size:12px;color:#14284e}
+#credit-run-review .credit-run-check input{width:16px;height:16px;margin:0;accent-color:#155eef}
+#credit-run-review .credit-run-note{padding:13px 15px;background:#edf4ff;border:1px solid #d4e3ff;border-radius:10px}
+#credit-run-review #credit-run-error{color:#c93d4c;margin-bottom:0;overflow-wrap:anywhere}
+#credit-run-review #credit-run-error:empty{display:none}
+#credit-run-review .credit-run-footer{display:flex;justify-content:flex-end;gap:9px;flex:none;padding:18px 24px;border-top:1px solid #dce5f2;background:#fff}
+@media(max-width:480px){#credit-run-review .credit-run-body{padding:21px 19px}#credit-run-review .credit-run-header{padding:14px 18px}#credit-run-review .credit-run-footer{padding:15px 18px;flex-wrap:wrap}}

@@ -12,6 +12,11 @@
   "adaptations": [
     "Scoped native transport replaces original localhost fetch.",
     "Application shell is separate; original feature markup, styles and actions retained.",
-    "Original Developer Tools added as a second view, excluding obsolete duplicate Code handlers; original credit-budget renderers retained."
-  ]
+    "Original Developer Tools added as a second view, excluding obsolete duplicate Code handlers; original credit-budget renderers retained.",
+    "Browser confirmations and alerts use awaited Core dialogs; the budget review matches Core styling and resets prior decisions before reopening. Original source hashes remain recorded in files; adaptedFiles records these intentional changes."
+  ],
+  "adaptedFiles": {
+    "tools-view.js": "991deb3008fd4406eaff72c99d792683137421b305d9b5d431a150c8c3ee938a",
+    "credit-runs.js": "4a92dfd5dee3a1a984748d31ef38a1816d80c99ae76a3feb8e26d50ab88ffecc"
+  }
 }

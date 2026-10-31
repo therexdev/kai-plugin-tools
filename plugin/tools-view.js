@@ -61,7 +61,7 @@
       conn.onclick = async () => {
         conn.textContent = "…";
         const r = await jfetch(`/core/mcp/${s.id}/${s.connected ? "disconnect" : "connect"}`, { method: "POST" });
-        if (!r.ok) alert(`Couldn't connect "${s.name}":\n${r.error}\n\nIf this is an npx server, Node.js must be installed on this computer.`);
+        if (!r.ok) await window.kai.dialogs.alert(`Couldn't connect "${s.name}":\n${r.error}\n\nIf this is an npx server, Node.js must be installed on this computer.`);
         render();
       };
       controls.appendChild(conn);
@@ -74,7 +74,7 @@
       controls.appendChild(trust);
       const rm = el("button", "linklike danger", "Remove");
       rm.onclick = async () => {
-        if (confirm(`Remove "${s.name}" and its tools?`)) {
+        if (await window.kai.dialogs.confirm(`Remove "${s.name}" and its tools?`)) {
           await jfetch(`/core/mcp/${s.id}`, { method: "DELETE" });
           render();
         }
@@ -127,7 +127,7 @@
         if (!r.ok) {
           btn.disabled = false;
           KaiI18n.setText(btn, KaiI18n.message`Set up tool runtime (~${mb} MB)`);
-          alert(`Couldn't set up the runtime:\n${r.error}`);
+          await window.kai.dialogs.alert(`Couldn't set up the runtime:\n${r.error}`);
         }
         render();
       };
@@ -198,7 +198,7 @@
       row.appendChild(el("span", "hint", cfg.encrypted ? " credentials in your OS keychain" : " credentials on disk (no OS keychain here)"));
       const rm = el("button", "linklike danger", "Disconnect");
       rm.onclick = async () => {
-        if (confirm("Disconnect and forget the saved login?")) {
+        if (await window.kai.dialogs.confirm("Disconnect and forget the saved login?")) {
           await cfg.remove();
           render();
         }
@@ -232,7 +232,7 @@
         for (const f of cfg.fields(preset)) vals[f.id] = $(`${cfg.kind}-${f.id}`)?.value || "";
         KaiI18n.setText(save, "Connecting…");
         const r = await cfg.save(vals, preset);
-        if (!r.ok && r.error) alert(`Couldn't connect: ${r.error}`);
+        if (!r.ok && r.error) await window.kai.dialogs.alert(`Couldn't connect: ${r.error}`);
         render();
       };
       const wrap = el("div", "form-row");
@@ -275,7 +275,7 @@
         label.style.cursor = "pointer";
         label.onclick = async () => {
           const mr = await jfetch(`/core/email/message?uid=${m.uid}`);
-          if (!mr.ok) return alert(mr.error || "couldn't open it");
+          if (!mr.ok) return await window.kai.dialogs.alert(mr.error || "couldn't open it");
           const body = el("div", "tool-row");
           body.appendChild(el("p", "hint", `${mr.message.from} · ${mr.message.date ? new Date(mr.message.date).toLocaleString() : ""}`));
           const pre = el("pre", null, mr.message.text);
@@ -305,11 +305,11 @@
       const bodyTa = document.createElement("textarea"); bodyTa.rows = 5; bodyTa.placeholder = "Message (tip: draft it in chat, paste it here)"; bodyTa.style.width = "100%";
       const send = el("button", "primary small", "Send");
       send.onclick = async () => {
-        if (!confirm(`Send this email to ${to.value}?`)) return;
+        if (!await window.kai.dialogs.confirm(`Send this email to ${to.value}?`)) return;
         KaiI18n.setText(send, "Sending…");
         const r = await jfetch("/core/email/send", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ to: to.value, subject: subj.value, text: bodyTa.value }) });
         KaiI18n.setText(send, r.ok ? "Sent ✓" : "Send");
-        if (!r.ok) alert(r.error || "couldn't send");
+        if (!r.ok) await window.kai.dialogs.alert(r.error || "couldn't send");
         else { to.value = subj.value = bodyTa.value = ""; setTimeout(() => (KaiI18n.setText(send, "Send")), 1500); }
       };
       for (const f of [to, subj]) { const fr = el("div", "form-row"); fr.appendChild(f); compose.appendChild(fr); }
@@ -341,11 +341,11 @@
       const start = el("input"); start.type = "datetime-local";
       const create = el("button", "primary small", "Add to calendar");
       create.onclick = async () => {
-        if (!title.value || !start.value) return alert("Give it a title and a start time.");
+        if (!title.value || !start.value) return await window.kai.dialogs.alert("Give it a title and a start time.");
         KaiI18n.setText(create, "Adding…");
         const r2 = await jfetch("/core/calendar/create", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ summary: title.value, startIso: new Date(start.value).toISOString() }) });
         KaiI18n.setText(create, r2.ok ? "Added ✓" : "Add to calendar");
-        if (!r2.ok) alert(r2.error || "couldn't create it");
+        if (!r2.ok) await window.kai.dialogs.alert(r2.error || "couldn't create it");
         else { title.value = start.value = ""; setTimeout(() => (KaiI18n.setText(create, "Add to calendar")), 1500); }
       };
       for (const f of [title, start, create]) { const fr = el("div", "form-row"); fr.appendChild(f); add.appendChild(fr); }
@@ -370,9 +370,9 @@
     // If this server needs Node and the machine has none, offer to fetch it
     // right here — adding a tool must never dead-end on a manual install.
     if (entry.requires === "node" && !mj.node?.available) {
-      if (!mj.node?.installable) return alert("This tool server needs Node.js, which isn't available for this platform yet.");
+      if (!mj.node?.installable) return await window.kai.dialogs.alert("This tool server needs Node.js, which isn't available for this platform yet.");
       const mb = Math.round((mj.node.downloadBytes || 0) / 1e6);
-      if (!confirm(`"${entry.name}" needs a small runtime to run (Node.js, about ${mb} MB).\n\nKoinos AI can set it up for you now — it installs inside the app, changes nothing else on your computer, and only needs doing once.\n\nSet it up and continue?`)) return;
+      if (!await window.kai.dialogs.confirm(`"${entry.name}" needs a small runtime to run (Node.js, about ${mb} MB).\n\nKoinos AI can set it up for you now — it installs inside the app, changes nothing else on your computer, and only needs doing once.\n\nSet it up and continue?`)) return;
       btn.disabled = true;
       KaiI18n.setText(btn, "Setting up runtime…");
       const nr = await jfetch("/core/mcp/runtime", { method: "POST" });
@@ -380,7 +380,7 @@
       KaiI18n.setText(btn, "Add");
       if (!nr.ok) {
         render();
-        return alert(`Couldn't set up the runtime:\n${nr.error}`);
+        return await window.kai.dialogs.alert(`Couldn't set up the runtime:\n${nr.error}`);
       }
     }
     let args = entry.args || [];
@@ -401,7 +401,7 @@
             inline.placeholder = entry.argsPrompt.label;
             inline.focus();
           }
-          alert(entry.argsPrompt.label);
+          await window.kai.dialogs.alert(entry.argsPrompt.label);
           return;
         }
         if (inline) { inline.value = ""; inline.hidden = true; }
@@ -423,8 +423,8 @@
       const c = await jfetch(`/core/mcp/${r.server.id}/connect`, { method: "POST" });
       btn.disabled = false;
       KaiI18n.setText(btn, "Add");
-      if (!c.ok) alert(`Added, but couldn't start it:\n${c.error}\n\nIt stays in your list — press Connect to try again.`);
-    } else alert(r.error || "couldn't add");
+      if (!c.ok) await window.kai.dialogs.alert(`Added, but couldn't start it:\n${c.error}\n\nIt stays in your list — press Connect to try again.`);
+    } else await window.kai.dialogs.alert(r.error || "couldn't add");
     } finally {
       busy = false;
       btn.disabled = false;
@@ -436,8 +436,8 @@
   $("mcp-add-custom")?.addEventListener("click", async () => {
     const url = $("mcp-url").value.trim();
     const cmd = $("mcp-cmd").value.trim();
-    if (!url && !cmd) return alert("Give either a server URL or a local command.");
-    if (cmd && !confirm("A local tool server is a PROGRAM that runs on this computer with your user account. Only continue if you trust where this command came from.\n\nContinue?")) return;
+    if (!url && !cmd) return await window.kai.dialogs.alert("Give either a server URL or a local command.");
+    if (cmd && !await window.kai.dialogs.confirm("A local tool server is a PROGRAM that runs on this computer with your user account. Only continue if you trust where this command came from.\n\nContinue?")) return;
     const r = await jfetch("/core/mcp", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -446,8 +446,8 @@
     if (r.ok) {
       $("mcp-name").value = $("mcp-url").value = $("mcp-cmd").value = "";
       const c = await jfetch(`/core/mcp/${r.server.id}/connect`, { method: "POST" });
-      if (!c.ok) alert(`Added, but couldn't connect:\n${c.error}`);
-    } else alert(r.error || "couldn't add");
+      if (!c.ok) await window.kai.dialogs.alert(`Added, but couldn't connect:\n${c.error}`);
+    } else await window.kai.dialogs.alert(r.error || "couldn't add");
     render();
   });
 

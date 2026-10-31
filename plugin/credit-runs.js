@@ -2,8 +2,17 @@
 (() => {
   const bridge = window.kaiKoinTestBridge; if (!bridge) return;
   const dialog = document.createElement("dialog"); dialog.id = "credit-run-review";
-  dialog.innerHTML = '<form method="dialog"><h2>Set a total run budget</h2><p>Research, Agents and Teams can make several AI calls. This one ceiling covers every model call and retry. Local tools add no network-credit charge; their permissions still apply.</p><label>Total credits <input id="credit-run-budget" inputmode="decimal" autocomplete="off" required /></label><label><input id="credit-run-free-only" type="checkbox" /> Free only</label><p id="credit-run-cost">Free credits are used first. Unless Free only is selected, purchased credits may cover the rest, up to this total budget.</p><p>Stop ends new work. Verified delivered work is charged once; useful partial results are saved in Account help → Research &amp; agent results.</p><p id="credit-run-error" role="alert"></p><button value="cancel" formnovalidate>Cancel</button><button id="credit-run-start" value="start" class="primary">Start within this budget</button></form>';
+  dialog.setAttribute("aria-labelledby", "credit-run-title");
+  dialog.innerHTML = `<form method="dialog">
+    <header class="credit-run-header"><span><img src="brand-mark.svg" width="25" height="25" alt="" />Review run budget</span><button id="credit-run-close" type="button" aria-label="Close" title="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></button></header>
+    <div class="credit-run-body"><h2 id="credit-run-title">Set a total run budget</h2><p>Research, Agents and Teams can make several AI calls. This one ceiling covers every model call and retry. Local tools add no network-credit charge; their permissions still apply.</p><label class="credit-run-field">Total credits <input id="credit-run-budget" inputmode="decimal" autocomplete="off" required /></label><label class="credit-run-check"><input id="credit-run-free-only" type="checkbox" /> Free only</label><p id="credit-run-cost">Free credits are used first. Unless Free only is selected, purchased credits may cover the rest, up to this total budget.</p><p class="credit-run-note">Stop ends new work. Verified delivered work is charged once; useful partial results are saved in Account help → Research &amp; agent results.</p><p id="credit-run-error" role="alert"></p></div>
+    <footer class="credit-run-footer"><button value="cancel" formnovalidate>Cancel</button><button id="credit-run-start" value="start" class="primary">Start within this budget</button></footer>
+  </form>`;
   document.body.appendChild(dialog);
+  const cancelReview = () => { if (dialog.open) dialog.close("cancel"); };
+  document.getElementById("credit-run-close").addEventListener("click", cancelReview);
+  dialog.addEventListener("cancel", event => { event.preventDefault(); cancelReview(); });
+  window.addEventListener("pagehide", cancelReview);
   const saved = document.createElement("details"); saved.id = "credit-run-results"; saved.innerHTML = '<summary>Research &amp; agent results</summary><p>Saved responses from Research, Agents and Teams, including useful results from interrupted runs.</p><div id="credit-run-history"></div>';
   // Recovery belongs with account history, not beside every network message.
   document.addEventListener("DOMContentLoaded", () => document.getElementById("view-recovery")?.appendChild(saved), { once: true });
@@ -19,6 +28,7 @@
       if (Array.isArray(info.models) && !selected?.available) throw Error("Choose an available network model before starting this run.");
       document.getElementById("credit-run-error").textContent = "";
       document.getElementById("credit-run-free-only").checked = false; paintCost();
+      dialog.returnValue = "";
       const accepted = await new Promise(resolve => { dialog.addEventListener("close", () => resolve(dialog.returnValue === "start"), { once: true }); dialog.showModal(); });
       if (!accepted) return false;
       const budget = document.getElementById("credit-run-budget").value.trim(), freeOnly = document.getElementById("credit-run-free-only").checked;

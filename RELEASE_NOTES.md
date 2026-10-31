@@ -1,7 +1,9 @@
-# 0.3.0 — Independent Foundation plugin
+# Tools 0.3.1
 
-Requires KAI Foundation 0.7.0 and plugin API 3. The plugin now ships and owns its native feature engine, interface, assets, state and dependencies. Core exposes documented shared services instead of private feature controllers.
+Requires **KAI Core 0.7.3 or later**. Update Core before installing this plugin update.
 
-This is a fresh-profile architecture. It does not import or delete original-app documents, accounts or settings. Installation explicitly requires trust in native code with full computer and application access. The interface remains sandboxed.
+Confirmations and alerts now use Core’s styled dialogs, including local tool-server and sensitive-run reviews. The run-budget popup uses the same header, typography, colors and buttons, with an accessible close control. Escape or close cannot reuse a prior budget approval.
 
-Tools owns paid team execution; Core retains the credit budget and per-call payment authorization. Runtime npm dependencies are bundled and signed at author build time. No npm installation runs on the user's computer.
+Saved plugin data and feature behavior are preserved.
+
+Validation covers deferred and cancelled reviews without live account, payment or node operations. Native plugin services still require full computer/application trust; renderer UI remains sandboxed.

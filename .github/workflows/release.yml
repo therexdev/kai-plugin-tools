@@ -34,6 +34,8 @@ jobs:
       - name: Verify Foundation source and dependency payloads
         run: node scripts/verify-package.js --source
       - run: npm test
+      - name: Assemble immutable signed asset parts
+        run: node scripts/assemble-signed-package.js
       - name: Detect signed package for this exact version
         id: package
         shell: bash
@@ -54,6 +56,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+      - name: Assemble immutable signed asset parts
+        run: node scripts/assemble-signed-package.js
       - name: Verify signed immutable asset again before publication
         run: node scripts/verify-package.js
       - name: Publish only the pre-signed current package

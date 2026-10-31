@@ -1,0 +1,18 @@
+{
+  "format": 1,
+  "asset": "kai-plugin-tools-0.3.1.kaiplugin",
+  "bytes": 9380312,
+  "sha256": "6536c9e2d0ba3111409d2c7beda779a6d9a7312a664e82f8eed70329fab16a40",
+  "parts": [
+    {
+      "file": "kai-plugin-tools-0.3.1.kaiplugin.part001",
+      "bytes": 8388608,
+      "sha256": "9d1085aca2e0bd5e3ecf18e7119a47fc12010cdb778752a00adbb8e1ddb215c9"
+    },
+    {
+      "file": "kai-plugin-tools-0.3.1.kaiplugin.part002",
+      "bytes": 991704,
+      "sha256": "5dee7bda4581d648a756c4ba73ba89fa0e5e7a71d485a277c53af9470af78b4b"
+    }
+  ]
+}

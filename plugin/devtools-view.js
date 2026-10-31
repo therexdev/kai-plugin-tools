@@ -360,7 +360,7 @@
     }
     // run_code in any agent gets the same upfront human yes as everywhere.
     if (toolNames.includes("run_code")) {
-      body.allowSensitive = confirm(
+      body.allowSensitive = await window.kai.dialogs.confirm(
         "This team includes run_code — agents may write and run code in the sandbox (its own scratch folder, no network). Allow for this run?"
       );
     }
@@ -485,7 +485,7 @@
     if (!question) return showError("Give the team a task first.");
     let allowSensitive = false;
     if (Array.isArray(spec.tools) && spec.tools.includes("run_code")) {
-      allowSensitive = confirm(
+      allowSensitive = await window.kai.dialogs.confirm(
         "This spec includes run_code — the team may write and run code in the sandbox (its own scratch folder, no network, no other programs). Allow for this run?"
       );
     }

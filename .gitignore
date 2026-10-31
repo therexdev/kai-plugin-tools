@@ -5,3 +5,5 @@ node_modules/
 # Signed native runtime dependencies are owned by this plugin.
 !plugin/service/node_modules/
 !plugin/service/node_modules/**
+
+/dist/kai-plugin-tools-0.3.1.kaiplugin
