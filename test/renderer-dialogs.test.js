@@ -1,4 +1,5 @@
 "use strict";
+const localeFixture = require("./i18n-fixture");
 const test = require("node:test"), assert = require("node:assert/strict"), fs = require("node:fs"), path = require("node:path"), vm = require("node:vm");
 const read = name => fs.readFileSync(path.join(__dirname, "../plugin", name), "utf8");
 const flush = () => new Promise(resolve => setImmediate(resolve));
@@ -20,7 +21,7 @@ function fixture() {
   let resolveReview;
   const window = { addEventListener(name, fn) { listeners.set(name, fn); }, kai: { dialogs: { confirm(message) { reviews.push(message); return new Promise(resolve => { resolveReview=resolve; }); }, alert:async()=>{} } } };
   const fetch = async (url, options={}) => { calls.push({url, options}); return {ok:true, json:async()=>({ok:true,server:{id:"server1"}})}; };
-  const context = vm.createContext({window,document,fetch,MutationObserver:class{observe(){}},clearInterval(){},setInterval(){},setTimeout(){},clearTimeout(){},URL,TextDecoder,TextEncoder,Uint8Array,ReadableStream,Response,console,crypto:require("node:crypto").webcrypto, $:get,state:{alias:"local"},coreGet:async()=>({}),composedChatModel:()=>"local",KaiI18n:{html:(s,...v)=>String.raw({raw:s},...v),message:(s,...v)=>String.raw({raw:s},...v),setText:(el,text)=>{el.textContent=text;}}});
+  const context = vm.createContext({window,document,fetch,MutationObserver:class{observe(){}},clearInterval(){},setInterval(){},setTimeout(){},clearTimeout(){},URL,TextDecoder,TextEncoder,Uint8Array,ReadableStream,Response,console,crypto:require("node:crypto").webcrypto, $:get,state:{alias:"local"},coreGet:async()=>({}),composedChatModel:()=>"local",KaiI18n:localeFixture});
   return {window, document, elements, created, calls, reviews, context, get, resolveReview:value=>resolveReview(value), listeners};
 }
 

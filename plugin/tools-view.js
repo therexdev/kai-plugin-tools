@@ -16,7 +16,7 @@
   const el = (tag, cls, text) => {
     const e = document.createElement(tag);
     if (cls) e.className = cls;
-    if (text != null) e.textContent = text;
+    if (text != null) KaiI18n.setText(e, text?.source ? text : KaiI18n.literal(text));
     return e;
   };
   const jfetch = (url, opts) => fetch(url, opts).then((r) => r.json().catch(() => ({ ok: false, error: `HTTP ${r.status}` })));
@@ -49,19 +49,19 @@
       const row = el("div", "tool-row");
       const head = el("div", "tool-row-head");
       head.appendChild(el("b", null, s.name));
-      head.appendChild(el("span", "hint", s.transport === "http" ? " web server" : " runs on this machine"));
-      const state = el("span", `tool-state ${s.connected ? "on" : ""}`, s.connected ? `connected · ${s.tools.length} tool${s.tools.length === 1 ? "" : "s"}` : "not connected");
+      head.appendChild(el("span", "hint", (s.transport === "http" ? KaiI18n.message([" web server"]) : KaiI18n.message([" runs on this machine"]))));
+      const state = el("span", `tool-state ${s.connected ? "on" : ""}`, (s.connected ? KaiI18n.message`connected · ${s.tools.length} tool${s.tools.length === 1 ? "" : "s"}` : KaiI18n.message(["not connected"])));
       head.appendChild(state);
       row.appendChild(head);
       if (s.connected && s.tools.length) {
         row.appendChild(el("div", "hint", s.tools.map((t) => t.name).join(" · ").slice(0, 220)));
       }
       const controls = el("div", "tool-controls");
-      const conn = el("button", "linklike", s.connected ? "Disconnect" : "Connect");
+      const conn = el("button", "linklike", (s.connected ? KaiI18n.message(["Disconnect"]) : KaiI18n.message(["Connect"])));
       conn.onclick = async () => {
         conn.textContent = "…";
         const r = await jfetch(`/core/mcp/${s.id}/${s.connected ? "disconnect" : "connect"}`, { method: "POST" });
-        if (!r.ok) await window.kai.dialogs.alert(`Couldn't connect "${s.name}":\n${r.error}\n\nIf this is an npx server, Node.js must be installed on this computer.`);
+        if (!r.ok) await window.kai.dialogs.alert(KaiI18n.t(KaiI18n.message`Couldn't connect "${s.name}":\n${r.error}\n\nIf this is an npx server, Node.js must be installed on this computer.`));
         render();
       };
       controls.appendChild(conn);
@@ -72,9 +72,9 @@
         render();
       };
       controls.appendChild(trust);
-      const rm = el("button", "linklike danger", "Remove");
+      const rm = el("button", "linklike danger", KaiI18n.message(["Remove"]));
       rm.onclick = async () => {
-        if (await window.kai.dialogs.confirm(`Remove "${s.name}" and its tools?`)) {
+        if (await window.kai.dialogs.confirm(KaiI18n.t(KaiI18n.message`Remove "${s.name}" and its tools?`))) {
           await jfetch(`/core/mcp/${s.id}`, { method: "DELETE" });
           render();
         }
@@ -83,7 +83,7 @@
       row.appendChild(controls);
       list.appendChild(row);
     }
-    if (!(mj.servers || []).length) list.appendChild(el("p", "hint", "No tool servers yet — add one below and your AI gains its abilities in Agent mode."));
+    if (!(mj.servers || []).length) list.appendChild(el("p", "hint", KaiI18n.message(["No tool servers yet — add one below and your AI gains its abilities in Agent mode."])));
 
     // Rebuild the catalog list ONLY when its contents actually change, and
     // always put the user's choice back — a blind innerHTML rewrite on the
@@ -95,7 +95,7 @@
     const installedNames = new Set((mj.servers || []).map((sv) => sv.name));
     const available = (mj.catalog || []).filter((c) => !installedNames.has(c.name));
     const wanted = available.length
-      ? available.map((c) => KaiI18n.html`<option value="${esc(c.id)}">${esc(c.name)} — ${esc(c.description)}</option>`).join("")
+      ? available.map((c) => KaiI18n.html`<option value="${esc(c.id)}">${KaiI18n.content(c.name)} — ${KaiI18n.content(c.description)}</option>`).join("")
       : KaiI18n.html`<option value="">Everything from the catalog is already added</option>`;
     if (cat.innerHTML !== wanted) {
       const keep = cat.value;
@@ -113,13 +113,11 @@
     const node = mj.node || {};
     nodeBox.innerHTML = "";
     if (node.available) {
-      nodeBox.appendChild(el("span", "hint", node.source === "system"
-        ? `Tool runtime ready (using the Node.js already on this computer, ${node.version}).`
-        : "Tool runtime ready (managed by Koinos AI)."));
+      nodeBox.appendChild(el("span", "hint", (node.source === "system" ? KaiI18n.message`Tool runtime ready (using the Node.js already on this computer, ${node.version}).` : KaiI18n.message(["Tool runtime ready (managed by Koinos AI)."]))));
     } else if (node.installable) {
       const mb = Math.round((node.downloadBytes || 0) / 1e6);
-      nodeBox.appendChild(el("span", "hint", `Most tool servers need a small runtime (Node.js, ~${mb} MB, one time). It installs inside Koinos AI — no system changes.`));
-      const btn = el("button", "primary small", `Set up tool runtime (~${mb} MB)`);
+      nodeBox.appendChild(el("span", "hint", KaiI18n.message`Most tool servers need a small runtime (Node.js, ~${mb} MB, one time). It installs inside Koinos AI — no system changes.`));
+      const btn = el("button", "primary small", KaiI18n.message`Set up tool runtime (~${mb} MB)`);
       btn.onclick = async () => {
         btn.disabled = true;
         KaiI18n.setText(btn, "Downloading…");
@@ -127,7 +125,7 @@
         if (!r.ok) {
           btn.disabled = false;
           KaiI18n.setText(btn, KaiI18n.message`Set up tool runtime (~${mb} MB)`);
-          await window.kai.dialogs.alert(`Couldn't set up the runtime:\n${r.error}`);
+          await window.kai.dialogs.alert(KaiI18n.t(KaiI18n.message`Couldn't set up the runtime:\n${r.error}`));
         }
         render();
       };
@@ -135,7 +133,7 @@
       row.appendChild(btn);
       nodeBox.appendChild(row);
     } else {
-      nodeBox.appendChild(el("span", "hint", "Tool servers that need Node.js aren't available for this platform yet — web-based (URL) servers still work."));
+      nodeBox.appendChild(el("span", "hint", KaiI18n.message(["Tool servers that need Node.js aren't available for this platform yet — web-based (URL) servers still work."])));
     }
 
     // ---- email ----
@@ -189,50 +187,50 @@
   function renderAccount(panel, cfg) {
     panel.innerHTML = "";
     if (cfg.localOnly && !cfg.connected) {
-      panel.appendChild(el("p", "hint", "Switched off in Local-Only privacy mode."));
+      panel.appendChild(el("p", "hint", KaiI18n.message(["Switched off in Local-Only privacy mode."])));
       return;
     }
     if (cfg.connected) {
       const row = el("div", "tool-row");
-      row.appendChild(el("span", null, `Connected: ${cfg.who}`));
-      row.appendChild(el("span", "hint", cfg.encrypted ? " credentials in your OS keychain" : " credentials on disk (no OS keychain here)"));
-      const rm = el("button", "linklike danger", "Disconnect");
+      row.appendChild(el("span", null, KaiI18n.message`Connected: ${cfg.who}`));
+      row.appendChild(el("span", "hint", (cfg.encrypted ? KaiI18n.message([" credentials in your OS keychain"]) : KaiI18n.message([" credentials on disk (no OS keychain here)"]))));
+      const rm = el("button", "linklike danger", KaiI18n.message(["Disconnect"]));
       rm.onclick = async () => {
-        if (await window.kai.dialogs.confirm("Disconnect and forget the saved login?")) {
+        if (await window.kai.dialogs.confirm(KaiI18n.t(KaiI18n.message(["Disconnect and forget the saved login?"])))) {
           await cfg.remove();
           render();
         }
       };
       row.appendChild(rm);
       panel.appendChild(row);
-      panel.appendChild(el("p", "hint", cfg.afterConnected));
+      panel.appendChild(el("p", "hint", KaiI18n.message([cfg.afterConnected])));
       if (cfg.kind === "email") renderInbox(panel);
       if (cfg.kind === "calendar") renderUpcoming(panel);
       return;
     }
     const sel = el("select");
-    sel.innerHTML = cfg.presets.map((p) => KaiI18n.html`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join("");
+    sel.innerHTML = cfg.presets.map((p) => KaiI18n.html`<option value="${esc(p.id)}">${KaiI18n.content(p.name)}</option>`).join("");
     const fieldsBox = el("div");
     const drawFields = () => {
       const preset = cfg.presets.find((p) => p.id === sel.value) || cfg.presets[0];
       fieldsBox.innerHTML = "";
-      if (preset?.help) fieldsBox.appendChild(el("p", "hint", `Where to get it: ${preset.help}`));
+      if (preset?.help) fieldsBox.appendChild(el("p", "hint", KaiI18n.message`Where to get it: ${KaiI18n.message([preset.help])}`));
       for (const f of cfg.fields(preset)) {
         const row = el("div", "form-row");
         const input = el("input");
         input.id = `${cfg.kind}-${f.id}`;
-        input.placeholder = f.label;
+        KaiI18n.setAttr(input, "placeholder", f.label);
         if (f.type) input.type = f.type;
         row.appendChild(input);
         fieldsBox.appendChild(row);
       }
-      const save = el("button", "primary small", "Connect");
+      const save = el("button", "primary small", KaiI18n.message(["Connect"]));
       save.onclick = async () => {
         const vals = {};
         for (const f of cfg.fields(preset)) vals[f.id] = $(`${cfg.kind}-${f.id}`)?.value || "";
         KaiI18n.setText(save, "Connecting…");
         const r = await cfg.save(vals, preset);
-        if (!r.ok && r.error) await window.kai.dialogs.alert(`Couldn't connect: ${r.error}`);
+        if (!r.ok && r.error) await window.kai.dialogs.alert(KaiI18n.t(KaiI18n.message`Couldn't connect: ${r.error}`));
         render();
       };
       const wrap = el("div", "form-row");
@@ -262,10 +260,10 @@
 
   function renderInbox(panel) {
     const box = el("div");
-    const open = el("button", "linklike", "Open inbox ▸");
+    const open = el("button", "linklike", KaiI18n.message(["Open inbox ▸"]));
     open.onclick = async () => {
       open.remove();
-      box.appendChild(el("p", "hint", "Loading…"));
+      box.appendChild(el("p", "hint", KaiI18n.message(["Loading…"])));
       const r = await jfetch("/core/email/inbox");
       box.innerHTML = "";
       if (!r.ok) return box.appendChild(el("p", "error", r.error || "couldn't load the inbox"));
@@ -284,9 +282,9 @@
           pre.style.overflow = "auto";
           body.appendChild(pre);
           const acts = el("div", "tool-controls");
-          const sum = el("button", "linklike", "Summarize in chat");
+          const sum = el("button", "linklike", KaiI18n.message(["Summarize in chat"]));
           sum.onclick = () => toChat(`Summarize this email in a few bullet points:\n\nFrom: ${mr.message.from}\nSubject: ${mr.message.subject}\n\n${mr.message.text.slice(0, 4000)}`);
-          const draft = el("button", "linklike", "Draft a reply in chat");
+          const draft = el("button", "linklike", KaiI18n.message(["Draft a reply in chat"]));
           draft.onclick = () => toChat(`Draft a reply to this email in my voice. Keep it concise. I'll review before sending anything:\n\nFrom: ${mr.message.from}\nSubject: ${mr.message.subject}\n\n${mr.message.text.slice(0, 4000)}`);
           acts.append(sum, draft);
           body.appendChild(acts);
@@ -300,12 +298,12 @@
       // path that sends mail — the model never can.
       const compose = el("details");
       compose.innerHTML = KaiI18n.html`<summary class="hint">Write an email</summary>`;
-      const to = el("input"); to.placeholder = "To";
-      const subj = el("input"); subj.placeholder = "Subject";
-      const bodyTa = document.createElement("textarea"); bodyTa.rows = 5; bodyTa.placeholder = "Message (tip: draft it in chat, paste it here)"; bodyTa.style.width = "100%";
-      const send = el("button", "primary small", "Send");
+      const to = el("input"); KaiI18n.setAttr(to, "placeholder", "To");
+      const subj = el("input"); KaiI18n.setAttr(subj, "placeholder", "Subject");
+      const bodyTa = document.createElement("textarea"); bodyTa.rows = 5; KaiI18n.setAttr(bodyTa, "placeholder", "Message (tip: draft it in chat, paste it here)"); bodyTa.style.width = "100%";
+      const send = el("button", "primary small", KaiI18n.message(["Send"]));
       send.onclick = async () => {
-        if (!await window.kai.dialogs.confirm(`Send this email to ${to.value}?`)) return;
+        if (!await window.kai.dialogs.confirm(KaiI18n.t(KaiI18n.message`Send this email to ${to.value}?`))) return;
         KaiI18n.setText(send, "Sending…");
         const r = await jfetch("/core/email/send", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ to: to.value, subject: subj.value, text: bodyTa.value }) });
         KaiI18n.setText(send, r.ok ? "Sent ✓" : "Send");
@@ -323,10 +321,10 @@
 
   function renderUpcoming(panel) {
     const box = el("div");
-    const open = el("button", "linklike", "Show upcoming events ▸");
+    const open = el("button", "linklike", KaiI18n.message(["Show upcoming events ▸"]));
     open.onclick = async () => {
       open.remove();
-      box.appendChild(el("p", "hint", "Loading…"));
+      box.appendChild(el("p", "hint", KaiI18n.message(["Loading…"])));
       const r = await jfetch("/core/calendar/events?days=14");
       box.innerHTML = "";
       if (!r.ok) return box.appendChild(el("p", "error", r.error || "couldn't load events"));
@@ -334,14 +332,14 @@
         const when = ev.allDay ? new Date(ev.start).toLocaleDateString() : new Date(ev.start).toLocaleString();
         box.appendChild(el("div", "tool-row slim", `${when} — ${ev.summary}${ev.location ? " @ " + ev.location : ""}${ev.repeats ? " ↻" : ""}`));
       }
-      if (!(r.events || []).length) box.appendChild(el("p", "hint", "Nothing in the next two weeks."));
+      if (!(r.events || []).length) box.appendChild(el("p", "hint", KaiI18n.message(["Nothing in the next two weeks."])));
       const add = el("details");
       add.innerHTML = KaiI18n.html`<summary class="hint">New event</summary>`;
-      const title = el("input"); title.placeholder = "Title";
+      const title = el("input"); KaiI18n.setAttr(title, "placeholder", "Title");
       const start = el("input"); start.type = "datetime-local";
-      const create = el("button", "primary small", "Add to calendar");
+      const create = el("button", "primary small", KaiI18n.message(["Add to calendar"]));
       create.onclick = async () => {
-        if (!title.value || !start.value) return await window.kai.dialogs.alert("Give it a title and a start time.");
+        if (!title.value || !start.value) return await window.kai.dialogs.alert(KaiI18n.t(KaiI18n.message(["Give it a title and a start time."])));
         KaiI18n.setText(create, "Adding…");
         const r2 = await jfetch("/core/calendar/create", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ summary: title.value, startIso: new Date(start.value).toISOString() }) });
         KaiI18n.setText(create, r2.ok ? "Added ✓" : "Add to calendar");
@@ -370,9 +368,9 @@
     // If this server needs Node and the machine has none, offer to fetch it
     // right here — adding a tool must never dead-end on a manual install.
     if (entry.requires === "node" && !mj.node?.available) {
-      if (!mj.node?.installable) return await window.kai.dialogs.alert("This tool server needs Node.js, which isn't available for this platform yet.");
+      if (!mj.node?.installable) return await window.kai.dialogs.alert(KaiI18n.t(KaiI18n.message(["This tool server needs Node.js, which isn't available for this platform yet."])));
       const mb = Math.round((mj.node.downloadBytes || 0) / 1e6);
-      if (!await window.kai.dialogs.confirm(`"${entry.name}" needs a small runtime to run (Node.js, about ${mb} MB).\n\nKoinos AI can set it up for you now — it installs inside the app, changes nothing else on your computer, and only needs doing once.\n\nSet it up and continue?`)) return;
+      if (!await window.kai.dialogs.confirm(KaiI18n.t(KaiI18n.message`"${entry.name}" needs a small runtime to run (Node.js, about ${mb} MB).\n\nKoinos AI can set it up for you now — it installs inside the app, changes nothing else on your computer, and only needs doing once.\n\nSet it up and continue?`))) return;
       btn.disabled = true;
       KaiI18n.setText(btn, "Setting up runtime…");
       const nr = await jfetch("/core/mcp/runtime", { method: "POST" });
@@ -380,7 +378,7 @@
       KaiI18n.setText(btn, "Add");
       if (!nr.ok) {
         render();
-        return await window.kai.dialogs.alert(`Couldn't set up the runtime:\n${nr.error}`);
+        return await window.kai.dialogs.alert(KaiI18n.t(KaiI18n.message`Couldn't set up the runtime:\n${nr.error}`));
       }
     }
     let args = entry.args || [];
@@ -423,7 +421,7 @@
       const c = await jfetch(`/core/mcp/${r.server.id}/connect`, { method: "POST" });
       btn.disabled = false;
       KaiI18n.setText(btn, "Add");
-      if (!c.ok) await window.kai.dialogs.alert(`Added, but couldn't start it:\n${c.error}\n\nIt stays in your list — press Connect to try again.`);
+      if (!c.ok) await window.kai.dialogs.alert(KaiI18n.t(KaiI18n.message`Added, but couldn't start it:\n${c.error}\n\nIt stays in your list — press Connect to try again.`));
     } else await window.kai.dialogs.alert(r.error || "couldn't add");
     } finally {
       busy = false;
@@ -436,8 +434,8 @@
   $("mcp-add-custom")?.addEventListener("click", async () => {
     const url = $("mcp-url").value.trim();
     const cmd = $("mcp-cmd").value.trim();
-    if (!url && !cmd) return await window.kai.dialogs.alert("Give either a server URL or a local command.");
-    if (cmd && !await window.kai.dialogs.confirm("A local tool server is a PROGRAM that runs on this computer with your user account. Only continue if you trust where this command came from.\n\nContinue?")) return;
+    if (!url && !cmd) return await window.kai.dialogs.alert(KaiI18n.t(KaiI18n.message(["Give either a server URL or a local command."])));
+    if (cmd && !await window.kai.dialogs.confirm(KaiI18n.t(KaiI18n.message(["A local tool server is a PROGRAM that runs on this computer with your user account. Only continue if you trust where this command came from.\n\nContinue?"])))) return;
     const r = await jfetch("/core/mcp", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -446,7 +444,7 @@
     if (r.ok) {
       $("mcp-name").value = $("mcp-url").value = $("mcp-cmd").value = "";
       const c = await jfetch(`/core/mcp/${r.server.id}/connect`, { method: "POST" });
-      if (!c.ok) await window.kai.dialogs.alert(`Added, but couldn't connect:\n${c.error}`);
+      if (!c.ok) await window.kai.dialogs.alert(KaiI18n.t(KaiI18n.message`Added, but couldn't connect:\n${c.error}`));
     } else await window.kai.dialogs.alert(r.error || "couldn't add");
     render();
   });

@@ -1,7 +1,7 @@
 "use strict";
 (() => {
   let view = "tools", refreshing = false, enabled = false;
-  const notice = error => { $("tools-developer-error").hidden = !error; $("tools-developer-error").textContent = error?.message || String(error || ""); };
+  const notice = error => { $("tools-developer-error").hidden = !error; KaiI18n.setText($("tools-developer-error"), error?.message || String(error || "")); };
   async function renderModels() {
     if (refreshing) return; refreshing = true;
     try {
@@ -17,7 +17,7 @@
       for (const choice of choices) { const option = document.createElement("option"); option.value = choice.id; option.textContent = choice.label; option.disabled = choice.disabled === true; $("model-pick").append(option); }
       if (choices.some(choice => choice.id === previous)) $("model-pick").value = previous;
       else if ($("src-pick").value === "local" && state.alias) $("model-pick").value = state.alias;
-      if (!choices.length) { const option = document.createElement("option"); option.value = ""; option.textContent = $("src-pick").value === "network" ? "No available network models" : "Install a model in Core first"; $("model-pick").append(option); }
+      if (!choices.length) { const option = document.createElement("option"); option.value = ""; KaiI18n.setText(option, ($("src-pick").value === "network" ? "No available network models" : "Install a model in Core first")); $("model-pick").append(option); }
       if ($("src-pick").value === "local") state.alias = $("model-pick").value || null;
       $("model-pick").dispatchEvent(new Event("change"));
     } catch (error) { notice(error); }
@@ -46,7 +46,7 @@
   for (const button of document.querySelectorAll("[data-tools-view]")) button.addEventListener("click", () => show(button.dataset.toolsView));
   $("src-pick").addEventListener("change", () => renderModels());
   $("model-pick").addEventListener("change", () => { if ($("src-pick").value === "local") state.alias = $("model-pick").value || null; });
-  const results = document.createElement("button"); results.className = "subtab"; results.textContent = "Research & agent results"; results.addEventListener("click", () => show("recovery")); document.querySelector(".tools-navigation").append(results);
+  const results = document.createElement("button"); results.className = "subtab"; KaiI18n.setText(results, "Research & agent results"); results.addEventListener("click", () => show("recovery")); document.querySelector(".tools-navigation").append(results);
   window.kai.onEvent("kai-plugin:navigate", value => { if (value?.section === "devtools") void show("devtools"); });
   window.addEventListener("unhandledrejection", event => { event.preventDefault(); const target = view === "devtools" ? $("dev-error") : $("tools-developer-error"); target.hidden = false; target.textContent = event.reason?.message || String(event.reason); });
   void show("tools");

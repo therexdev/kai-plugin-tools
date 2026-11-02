@@ -107,7 +107,7 @@
         name.textContent = key;
         // The id lives here and nowhere else — findable when you need it,
         // invisible when you do not.
-        if (tools[0].serverId) name.title = `Tool server id: ${tools[0].serverId}`;
+        if (tools[0].serverId) KaiI18n.setAttr(name, "title", KaiI18n.message`Tool server id: ${tools[0].serverId}`);
         const all = document.createElement("button");
         all.type = "button";
         all.className = "linklike tool-group-all";
@@ -174,7 +174,7 @@
     nameField.appendChild(document.createTextNode("Agent name"));
     const name = document.createElement("input");
     name.className = "ag-name";
-    name.placeholder = "Name (e.g. Researcher)";
+    KaiI18n.setAttr(name, "placeholder", "Name (e.g. Researcher)");
     name.value = a.name || "";
     nameField.appendChild(name);
     const human = document.createElement("label");
@@ -196,7 +196,7 @@
     const prompt = document.createElement("textarea");
     prompt.className = "ag-prompt";
     prompt.rows = 2;
-    prompt.placeholder = "Role instructions (system prompt)";
+    KaiI18n.setAttr(prompt, "placeholder", "Role instructions (system prompt)");
     prompt.value = a.systemPrompt || "";
     promptField.appendChild(prompt);
     const tools = document.createElement("div");
@@ -361,7 +361,7 @@
     // run_code in any agent gets the same upfront human yes as everywhere.
     if (toolNames.includes("run_code")) {
       body.allowSensitive = await window.kai.dialogs.confirm(
-        "This team includes run_code — agents may write and run code in the sandbox (its own scratch folder, no network). Allow for this run?"
+        KaiI18n.t(KaiI18n.message(["This team includes run_code — agents may write and run code in the sandbox (its own scratch folder, no network). Allow for this run?"]))
       );
     }
     $("pg-convo").innerHTML = "";
@@ -470,7 +470,7 @@
     $("dev-spec").value = JSON.stringify(spec, null, 2);
   });
 
-  const pipelineStop = document.createElement("button"); pipelineStop.textContent = "Stop"; pipelineStop.hidden = true;
+  const pipelineStop = document.createElement("button"); KaiI18n.setText(pipelineStop, "Stop"); pipelineStop.hidden = true;
   $("btn-dev-run").after(pipelineStop); pipelineStop.addEventListener("click", () => KaiCreditRuns.stop());
   $("btn-dev-run").addEventListener("click", async () => {
     clearError();
@@ -486,7 +486,7 @@
     let allowSensitive = false;
     if (Array.isArray(spec.tools) && spec.tools.includes("run_code")) {
       allowSensitive = await window.kai.dialogs.confirm(
-        "This spec includes run_code — the team may write and run code in the sandbox (its own scratch folder, no network, no other programs). Allow for this run?"
+        KaiI18n.t(KaiI18n.message(["This spec includes run_code — the team may write and run code in the sandbox (its own scratch folder, no network, no other programs). Allow for this run?"]))
       );
     }
     out.hidden = false;

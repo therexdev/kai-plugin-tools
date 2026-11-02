@@ -1,11 +1,12 @@
 {
   "name": "kai-plugin-tools",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "private": true,
   "license": "MIT",
   "scripts": {
     "test": "node --test test/*.test.js",
-    "build": "node scripts/build-service.js"
+    "build": "node scripts/build-service.js",
+    "build:locales": "node scripts/build-locales.js"
   },
   "dependencies": {
     "imapflow": "1.7.1",

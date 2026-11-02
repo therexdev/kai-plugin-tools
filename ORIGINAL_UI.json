@@ -16,7 +16,8 @@
     "Browser confirmations and alerts use awaited Core dialogs; the budget review matches Core styling and resets prior decisions before reopening. Original source hashes remain recorded in files; adaptedFiles records these intentional changes."
   ],
   "adaptedFiles": {
-    "tools-view.js": "991deb3008fd4406eaff72c99d792683137421b305d9b5d431a150c8c3ee938a",
-    "credit-runs.js": "4a92dfd5dee3a1a984748d31ef38a1816d80c99ae76a3feb8e26d50ab88ffecc"
+    "tools-view.js": "458615bf9afb3e822a0eb8d3ecaccb00d015a3b2ae778aa5a1dea914a3967baf",
+    "credit-runs.js": "f736ca652d8ccd4ce4227309b816e3e72eb8a4d1cb5347d194bb206206938850",
+    "network-chat.js": "9c7f348a64b42ca0a47b58c20bc4436c39b76a9a000021c6eb069661a5158508"
   }
 }
