@@ -1,4 +1,10 @@
-# Tools 0.3.1
+# Tools 0.3.2
+
+Follows the language saved in Core Settings, including changes to open views. Supports English, Spanish, Brazilian Portuguese, French and German with offline catalogs. Core owns the first-run choice; plugin content and identifiers stay literal. Requires Core 0.7.17 or newer.
+
+## Previous release
+
+Tools 0.3.1
 
 Requires **KAI Core 0.7.3 or later**. Update Core before installing this plugin update.
 

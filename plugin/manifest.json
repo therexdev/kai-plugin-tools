@@ -3,7 +3,7 @@
   "apiVersion": 3,
   "id": "kai.tools",
   "name": "KAI Tools",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "The original Tools and Developer Tools workspaces: MCP, email, calendar, saved agent teams, pipelines, playground and benchmarks.",
   "entry": "index.html",
   "permissions": [
